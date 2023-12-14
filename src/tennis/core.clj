@@ -1,6 +1,8 @@
-(ns tennis.core)
+(ns tennis.core
+  (:require [tennis.api :as api]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn resolve-handle
+  "Test resolving handle"
+  [host handle]
+  (let [agent (api/service host)]
+    (agent :resolve-handle handle)))
