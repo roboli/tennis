@@ -1,6 +1,6 @@
 # tennis
 
-Libraries for the (**ATP**rotocol)[https://atproto.com/] in Clojure.
+Libraries for the [**ATP**rotocol](https://atproto.com/) in Clojure.
 
 ## Usage
 
