@@ -9,8 +9,6 @@
      (let [type (get-in schema [:defs :main :type])
            url  (str "https://" host "/xrpc/" nsid)]
        (if (= "query" type)
-         (client/get url {:accept :json
-                          :query-params params})
-         (client/post url {:accept :json
-                           :query-params params}
+         (client/get url {:query-params params})
+         (client/post url {:query-params params}
                       body))))))
