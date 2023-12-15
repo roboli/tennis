@@ -14,4 +14,5 @@
                   (client/post url {:query-params params}
                                body))]
        {:data (parse-string (:body res) true)
-        :headers (:headers res)}))))
+        :headers (:headers res)})
+     (throw (Exception. "No schema found for that method/nsid")))))
