@@ -1,14 +1,19 @@
 (ns tennis.api
   (:require [tennis.xrpc :as xrpc]))
 
-(defn get-post-thread [host uri]
-  (xrpc/process-request host "app.bsky.feed.getPostThread" {"uri" uri}))
-
-(defn resolve-handle [host handle]
-  (xrpc/process-request host "com.atproto.identity.resolveHandle" {"handle" handle}))
-
-(defn service [host]
-  (fn [method & args]
+(defn agent [opts]
+  (fn [method]
     (condp = method
-      :get-post-thread (get-post-thread host (first args))
-      :resolve-handle  (resolve-handle host (first args)))))
+      :get-post-thread
+      (fn [uri]
+        (xrpc/process-request (:service opts) "app.bsky.feed.getPostThread" {"uri" uri}))
+
+      :resolve-handle
+      (fn [handle]
+        (xrpc/process-request (:service opts) "com.atproto.identity.resolveHandle" {"handle" handle})))))
+
+(defn resolve-handle [svc handle]
+  ((svc :resolve-handle) handle))
+
+(defn get-post-thread [svc uri]
+  ((svc :get-post-thread) uri))
