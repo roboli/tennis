@@ -16,3 +16,10 @@
     {:author (get-in post [:author :handle])
      :name   (get-in post [:author :displayName])
      :text   (get-in post [:record :text])}))
+
+(defn post
+  "Test creating a post"
+  [host handle pwd]
+  (let [agent   (api/agent {:service host})
+        session (api/create-session agent handle pwd)]
+    (api/post session "Me here again!")))
