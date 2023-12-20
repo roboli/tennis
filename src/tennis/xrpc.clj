@@ -4,19 +4,20 @@
             [tennis.lexicon :as lex]))
 
 (defn process-request
-  ([host nsid params] (process-request host nsid params nil))
-  ([host nsid params body] (process-request host nsid {} params body))
-  ([host nsid headers params body]
-   (if-let [schema (get lex/schemas nsid)]
-     (let [type (get-in schema [:defs :main :type])
-           url  (str "https://" host "/xrpc/" nsid)
-           res  (if (= "query" type)
-                  (client/get url {:headers headers
-                                   :query-params params})
-                  (client/post url {:content-type :json
-                                    :headers headers
-                                    :query-params params
-                                    :body (generate-string body)}))]
-       {:data (parse-string (:body res) true)
-        :headers (:headers res)})
-     (throw (Exception. "No schema found for that method/nsid")))))
+  [host nsid {:keys [headers params body]
+              :or {headers {}
+                   params {}
+                   body {}}}]
+  (if-let [schema (get lex/schemas nsid)]
+    (let [type (get-in schema [:defs :main :type])
+          url  (str "https://" host "/xrpc/" nsid)
+          res  (if (= "query" type)
+                 (client/get url {:headers headers
+                                  :query-params params})
+                 (client/post url {:content-type :json
+                                   :headers headers
+                                   :query-params params
+                                   :body (generate-string body)}))]
+      {:data (parse-string (:body res) true)
+       :headers (:headers res)})
+    (throw (Exception. "No schema found for that method/nsid"))))
