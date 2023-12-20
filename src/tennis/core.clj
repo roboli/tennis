@@ -19,7 +19,7 @@
 
 (defn post
   "Test creating a post"
-  [host handle pwd]
+  [host handle pwd text]
   (let [agent   (api/agent {:service host})
         session (api/create-session agent handle pwd)]
-    (api/post session "Me here again!")))
+    (api/post session text)))
