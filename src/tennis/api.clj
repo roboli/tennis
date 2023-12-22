@@ -9,11 +9,11 @@
         (xrpc/process-request (get-in opts [:agent :service])
                               "com.atproto.repo.createRecord"
                               {:headers {:authorization (str "Bearer " (:access-jwt opts))}
-                               :body {"repo" (:did opts)
-                                      "collection" "app.bsky.feed.post"
-                                      "record" {"text" text
-                                                "createdAt" (java.util.Date.)
-                                                "$type" "app.bsky.feed.post"}}})))))
+                               :body {:repo (:did opts)
+                                      :collection "app.bsky.feed.post"
+                                      :record {:text text
+                                               :createdAt (java.util.Date.)
+                                               :$type "app.bsky.feed.post"}}})))))
 
 (defn post [ssn text]
   ((ssn :post) text))
@@ -25,8 +25,8 @@
       (fn [handle password]
         (let [response (xrpc/process-request (:service opts)
                                              "com.atproto.server.createSession"
-                                             {:body {"identifier" handle
-                                                     "password" password}})
+                                             {:body {:identifier handle
+                                                     :password password}})
               data     (:data response)]
           (session {:access-jwt (:accessJwt data)
                     :refresh-jwt (:accessJwt data)
@@ -40,13 +40,13 @@
       (fn [uri]
         (xrpc/process-request (:service opts)
                               "app.bsky.feed.getPostThread"
-                              {:params {"uri" uri}}))
+                              {:params {:uri uri}}))
 
       :resolve-handle
       (fn [handle]
         (xrpc/process-request (:service opts)
                               "com.atproto.identity.resolveHandle"
-                              {:params {"handle" handle}})))))
+                              {:params {:handle handle}})))))
 
 (defn create-session [svc handle password]
   ((svc :create-session) handle password))
