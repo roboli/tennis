@@ -1,4 +1,6 @@
-(ns tennis.lexicon)
+(ns tennis.lexicon
+  (:require [malli.core :as m]
+            [malli.error :as me]))
 
 (def app-bsky-feed-getpostthread
   {:lexicon 1,
@@ -96,3 +98,36 @@
               "com.atproto.identity.resolveHandle" com-atproto-identity-resolvehandle
               "com.atproto.repo.createRecord" com-atproto-repo-createrecord
               "com.atproto.server.createSession" com-atproto-server-createsession})
+
+(defn- coerce-type [type]
+  (condp = type
+    "integer" :int
+    "unknown" :any
+    (keyword type)))
+
+(defn- schema->mallin [constraints]
+  (let [required (set (:required constraints))]
+    (reduce
+     (fn [acc [k v]]
+       (let [rule (if (not (required k))
+                    [k {:optional true}]
+                    [k])]
+         (conj acc (conj rule (coerce-type (:type v))))))
+     [:map]
+     (:properties constraints))))
+
+(def constraints-paths
+  {:query-parameters [:defs :main :parameters]
+   :procedure-input [:defs :main :input :schema]})
+
+(defn validate [type schema data]
+  (let [constraints  (get-in schema (type constraints-paths))
+        valid-schema (schema->mallin constraints)]
+    (m/validate valid-schema data)))
+
+(defn explain [type schema data]
+  (let [constraints  (get-in schema (type constraints-paths))
+        valid-schema (schema->mallin constraints)]
+    (-> valid-schema
+        (m/explain data)
+        (me/humanize data))))

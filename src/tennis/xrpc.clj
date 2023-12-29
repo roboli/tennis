@@ -3,12 +3,6 @@
             [cheshire.core :refer [parse-string generate-string]]
             [tennis.lexicon :as lex]))
 
-(defn- schema->mallin [schema] identity)
-
-(defn- validate [schema data] true)
-
-(defn- explain [schema data] "errors")
-
 (defn- http-method [schema]
   (if (= "query" (get-in schema [:defs :main :type]))
     client/get
@@ -23,20 +17,26 @@
 
 (defn- construct-query-params [schema params payload]
   (if (= "query" (get-in schema [:defs :main :type]))
-    (let [valid-schema (schema->mallin schema)]
-      (if (validate valid-schema params)
-        (assoc payload :query-params params)
-        (throw (Exception. "Invalid query param found: "
-                           (:errors (explain valid-schema params))))))
+    (if (lex/validate :query-parameters
+                      schema
+                      params)
+      (assoc payload :query-params params)
+      (throw (Exception. (str "Invalid query param found: "
+                              (lex/explain :query-parameters
+                                           schema
+                                           params)))))
     payload))
 
 (defn- construct-body [schema body payload]
   (if (= "procedure" (get-in schema [:defs :main :type]))
-    (let [valid-schema (schema->mallin schema)]
-      (if (validate valid-schema body)
-        (assoc payload :body (generate-string body))
-        (throw (Exception. "Invalid property in body found: "
-                           (:errors (explain valid-schema body))))))
+    (if (lex/validate :procedure-input
+                      schema
+                      body)
+      (assoc payload :body (generate-string body))
+      (throw (Exception. (str "Invalid property in body found: "
+                              (lex/explain :procedure-input
+                                           schema
+                                           body)))))
     payload))
 
 (defn process-request
