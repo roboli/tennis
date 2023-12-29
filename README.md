@@ -40,9 +40,9 @@ Follow functions available in core to see what you can do atm:
 ## What's inside so far?
 
 * core: Just few functions as examples (yet to be decided what will be here).
-* api: This is the entry point for making requests. Basically you can create:
-** An `agent`: Which lets you make unauthenticated requests to a PDS service.
-** A `session`: It requires an `agent` and lets you make authenticated requests like creating a post.
+* api: This is the entry point for making requests. Basically you can create a(n):
+  * `agent`: Which lets you make unauthenticated requests to a PDS service.
+  * `session`: It requires an `agent` and lets you make authenticated requests like creating a post.
 * xrpc: Creates the HTTP request (GET or POST).
 * lexicon: Contains schemas and validates (partly) outgoing data from requests against them.
 
