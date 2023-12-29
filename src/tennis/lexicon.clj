@@ -1,4 +1,6 @@
-(ns tennis.lexicon)
+(ns tennis.lexicon
+  (:require [malli.core :as m]
+            [malli.error :as me]))
 
 (def app-bsky-feed-getpostthread
   {:lexicon 1,
@@ -6,14 +8,14 @@
    :defs {:main {:type "query",
                  :description "Get posts in a thread.",
                  :parameters {:type "params",
-                              :required ["uri"],
+                              :required [:uri],
                               :properties {:uri {:type "string", :format "at-uri"},
                                            :depth {:type "integer", :default 6, :minimum 0, :maximum 1000},
                                            :parentHeight
                                            {:type "integer", :default 80, :minimum 0, :maximum 1000}}},
                  :output {:encoding "application/json",
                           :schema {:type "object",
-                                   :required ["thread"],
+                                   :required [:thread],
                                    :properties
                                    {:thread {:type "union",
                                              :refs ["lex:app.bsky.feed.defs#threadViewPost"
@@ -27,13 +29,13 @@
    :defs {:main {:type "query",
                  :description "Provides the DID of a repo.",
                  :parameters {:type "params",
-                              :required ["handle"],
+                              :required [:handle],
                               :properties {:handle {:type "string",
                                                     :format "handle",
                                                     :description "The handle to resolve."}}},
                  :output {:encoding "application/json",
                           :schema {:type "object",
-                                   :required ["did"],
+                                   :required [:did],
                                    :properties {:did {:type "string", :format "did"}}}}}}})
 
 (def com-atproto-repo-createrecord
@@ -43,7 +45,7 @@
                  :description "Create a new record.",
                  :input {:encoding "application/json",
                          :schema {:type "object",
-                                  :required ["repo" "collection" "record"],
+                                  :required [:repo :collection :record],
                                   :properties {:repo {:type "string",
                                                       :format "at-identifier",
                                                       :description "The handle or DID of the repo."},
@@ -63,7 +65,7 @@
                                                             "Compare and swap with the previous commit by CID."}}}},
                  :output {:encoding "application/json",
                           :schema {:type "object",
-                                   :required ["uri" "cid"],
+                                   :required [:uri :cid],
                                    :properties {:uri {:type "string", :format "at-uri"},
                                                 :cid {:type "string", :format "cid"}}}},
                  :errors [{:name "InvalidSwap"}]}}})
@@ -75,14 +77,14 @@
                  :description "Create an authentication session.",
                  :input {:encoding "application/json",
                          :schema {:type "object",
-                                  :required ["identifier" "password"],
+                                  :required [:identifier :password],
                                   :properties {:identifier {:type "string",
                                                             :description
                                                             "Handle or other identifier supported by the server for the authenticating user."},
                                                :password {:type "string"}}}},
                  :output {:encoding "application/json",
                           :schema {:type "object",
-                                   :required ["accessJwt" "refreshJwt" "handle" "did"],
+                                   :required [:accessJwt :refreshJwt :handle :did],
                                    :properties {:accessJwt {:type "string"},
                                                 :refreshJwt {:type "string"},
                                                 :handle {:type "string", :format "handle"},
@@ -96,3 +98,36 @@
               "com.atproto.identity.resolveHandle" com-atproto-identity-resolvehandle
               "com.atproto.repo.createRecord" com-atproto-repo-createrecord
               "com.atproto.server.createSession" com-atproto-server-createsession})
+
+(defn- coerce-type [type]
+  (condp = type
+    "integer" :int
+    "unknown" :any
+    (keyword type)))
+
+(defn- schema->mallin [constraints]
+  (let [required (set (:required constraints))]
+    (reduce
+     (fn [acc [k v]]
+       (let [rule (if (not (required k))
+                    [k {:optional true}]
+                    [k])]
+         (conj acc (conj rule (coerce-type (:type v))))))
+     [:map]
+     (:properties constraints))))
+
+(def constraints-paths
+  {:query-parameters [:defs :main :parameters]
+   :procedure-input [:defs :main :input :schema]})
+
+(defn validate [type schema data]
+  (let [constraints  (get-in schema (type constraints-paths))
+        valid-schema (schema->mallin constraints)]
+    (m/validate valid-schema data)))
+
+(defn explain [type schema data]
+  (let [constraints  (get-in schema (type constraints-paths))
+        valid-schema (schema->mallin constraints)]
+    (-> valid-schema
+        (m/explain data)
+        (me/humanize data))))
