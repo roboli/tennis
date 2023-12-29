@@ -1,14 +1,41 @@
 # tennis
 
+**WIP**
+
 Libraries for the [**ATP**rotocol](https://atproto.com/) in Clojure.
 
 ## Usage
 
-**WIP**. Not much to see yet :(
+Follow functions available in core to see what you can do atm:
+
+```clojure
+(resolve-handle "https://api.bsky.app" "retr0.id")
+;;=>
+;; {:data {:did "did:plc:did-here"},
+;;  :headers
+;;  { ... }
+
+(get-post-thread "https://api.bsky.app" "at://did:plc:vwzwgnygau7ed7b7wt5ux7y2/app.bsky.feed.post/3karfx5vrvv23")
+;;=>
+;; {:author "retr0.id",
+;;  :name "David Buchanan",
+;;  :text
+;;  "apparently it's cybersecurity awareness month. you are now aware of cybersecurity. please don't panic."}
+
+(post "https://any-pds-service.com" "your-handle.any-pds-service.com" "your-password" "What a lovely day!")
+;;=>
+;; {:data
+;;  {:uri
+;;   "at://did:plc:your-did-here/app.bsky.feed.post/3khomp3o6pc2n",
+;;   :cid
+;;   "bafyreicvmz4xjqt7j7uzi7vpzhxsfkkdaoh3vvucs76usvtwoedtgpep6u"},
+;;  :headers
+;;  { .. }
+```
 
 ## License
 
-Copyright © 2023 FIXME
+Copyright © 2023 Robert Oliveros
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
