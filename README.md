@@ -15,14 +15,18 @@ Follow functions available in core to see what you can do atm:
 ;;  :headers
 ;;  { ... }
 
-(get-post-thread "https://api.bsky.app" "at://did:plc:vwzwgnygau7ed7b7wt5ux7y2/app.bsky.feed.post/3karfx5vrvv23")
+(get-post-thread "https://api.bsky.app"
+                 "at://did:plc:did-here/app.bsky.feed.post/3karfx5vrvv23")
 ;;=>
 ;; {:author "retr0.id",
 ;;  :name "David Buchanan",
 ;;  :text
-;;  "apparently it's cybersecurity awareness month. you are now aware of cybersecurity. please don't panic."}
+;;  "apparently it's cybersecurity awareness month. you are now aware..."}
 
-(post "https://any-pds-service.com" "your-handle.any-pds-service.com" "your-password" "What a lovely day!")
+(post "https://any-pds-service.com"
+      "your-handle.any-pds-service.com"
+      "your-password"
+      "What a lovely day!")
 ;;=>
 ;; {:data
 ;;  {:uri
