@@ -24,7 +24,7 @@
   "Create an agent to make unauthenticated requests to a PDS service."
   (fn [method]
     (condp = method
-      :create-session
+      :login
       (fn [handle password]
         (let [response (xrpc/process-request (:service opts)
                                              "com.atproto.server.createSession"
@@ -51,12 +51,12 @@
                               "com.atproto.identity.resolveHandle"
                               {:params {:handle handle}})))))
 
-(defn create-session [agent handle password]
-  "Creates a session for a service."
-  ((agent :create-session) handle password))
+(defn login [agent handle password]
+  "Creates a session in a service."
+  ((agent :login) handle password))
 
 (defn resolve-handle [agent handle]
-  "Resolves handle in service."
+  "Resolves handle in a service."
   ((agent :resolve-handle) handle))
 
 (defn get-post-thread [agent uri]

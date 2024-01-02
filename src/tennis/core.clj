@@ -21,5 +21,5 @@
   "Test creating a post"
   [service handle pwd text]
   (let [agent   (api/agent {:service service})
-        session (api/create-session agent handle pwd)]
+        session (api/login agent handle pwd)]
     (api/post session text)))
