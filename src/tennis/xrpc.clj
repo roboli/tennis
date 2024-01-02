@@ -4,19 +4,19 @@
             [tennis.lexicon :as lex]))
 
 (defn- http-method [schema]
-  (if (= "query" (get-in schema [:defs :main :type]))
+  (if (= :query (lex/schema-type schema))
     client/get
     client/post))
 
 (defn- construct-headers [schema headers payload]
-  (if (and (= "procedure" (get-in schema [:defs :main :type]))
+  (if (and (= :procedure (lex/schema-type schema))
            (= "application/json" (get-in schema [:defs :main :input :encoding])))
     (-> (assoc payload :headers headers)
         (assoc-in [:headers :content-type] "application/json"))
     headers))
 
 (defn- construct-query-params [schema params payload]
-  (if (= "query" (get-in schema [:defs :main :type]))
+  (if (= :query (lex/schema-type schema))
     (if (lex/validate :query-parameters
                       schema
                       params)
@@ -28,7 +28,7 @@
     payload))
 
 (defn- construct-body [schema body payload]
-  (if (= "procedure" (get-in schema [:defs :main :type]))
+  (if (= :procedure (lex/schema-type schema))
     (if (lex/validate :procedure-input
                       schema
                       body)

@@ -131,3 +131,6 @@
     (-> valid-schema
         (m/explain data)
         (me/humanize data))))
+
+(defn schema-type [schema]
+  (keyword (get-in schema [:defs :main :type])))
