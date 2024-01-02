@@ -10,7 +10,7 @@
 
 (defn- construct-headers [schema headers payload]
   (if (and (= :procedure (lex/schema-type schema))
-           (= "application/json" (get-in schema [:defs :main :input :encoding])))
+           (= "application/json" (lex/schema-encoding :procedure-input schema)))
     (-> (assoc payload :headers headers)
         (assoc-in [:headers :content-type] "application/json"))
     headers))
