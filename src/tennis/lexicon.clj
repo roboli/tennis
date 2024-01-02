@@ -116,21 +116,22 @@
      [:map]
      (:properties constraints))))
 
-(def constraints-paths
+(def paths
   {:query-parameters [:defs :main :parameters]
-   :procedure-input [:defs :main :input :schema]})
+   :procedure-input [:defs :main :input :schema]
+   :schema-type [:defs :main :type]})
 
-(defn validate [type schema data]
-  (let [constraints  (get-in schema (type constraints-paths))
+(defn validate [constraint-type schema data]
+  (let [constraints  (get-in schema (constraint-type paths))
         valid-schema (schema->mallin constraints)]
     (m/validate valid-schema data)))
 
-(defn explain [type schema data]
-  (let [constraints  (get-in schema (type constraints-paths))
+(defn explain [constraint-type schema data]
+  (let [constraints  (get-in schema (constraint-type paths))
         valid-schema (schema->mallin constraints)]
     (-> valid-schema
         (m/explain data)
         (me/humanize data))))
 
 (defn schema-type [schema]
-  (keyword (get-in schema [:defs :main :type])))
+  (keyword (get-in schema (:schema-type paths))))
