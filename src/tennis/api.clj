@@ -2,6 +2,7 @@
   (:require [tennis.xrpc :as xrpc]))
 
 (defn- session [opts]
+  "Create a session to make authenticated requests to a PDS service."
   (fn [method]
     (condp = method
       :post
@@ -15,10 +16,12 @@
                                                :createdAt (java.util.Date.)
                                                :$type "app.bsky.feed.post"}}})))))
 
-(defn post [ssn text]
-  ((ssn :post) text))
+(defn post [session text]
+  "Create a post using a session."
+  ((session :post) text))
 
 (defn agent [opts]
+  "Create an agent to make unauthenticated requests to a PDS service."
   (fn [method]
     (condp = method
       :create-session
@@ -48,11 +51,14 @@
                               "com.atproto.identity.resolveHandle"
                               {:params {:handle handle}})))))
 
-(defn create-session [svc handle password]
-  ((svc :create-session) handle password))
+(defn create-session [agent handle password]
+  "Creates a session for a service."
+  ((agent :create-session) handle password))
 
-(defn resolve-handle [svc handle]
-  ((svc :resolve-handle) handle))
+(defn resolve-handle [agent handle]
+  "Resolves handle in service."
+  ((agent :resolve-handle) handle))
 
-(defn get-post-thread [svc uri]
-  ((svc :get-post-thread) uri))
+(defn get-post-thread [agent uri]
+  "Gets thread from service."
+  ((agent :get-post-thread) uri))
