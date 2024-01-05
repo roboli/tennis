@@ -118,7 +118,8 @@
 
 (def constraints-paths
   {:query-parameters [:defs :main :parameters]
-   :procedure-input [:defs :main :input :schema]})
+   :procedure-input [:defs :main :input :schema]
+   :any-output [:defs :main :output :schema]})
 
 (defn validate [constraint-type schema data]
   (let [constraints  (get-in schema (constraint-type constraints-paths))

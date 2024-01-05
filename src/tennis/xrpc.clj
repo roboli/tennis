@@ -39,6 +39,16 @@
                                            body)))))
     payload))
 
+(defn- assert-valid-output [schema response]
+  (if (lex/validate :any-output
+                    schema
+                    response)
+    response
+    (throw (Exception. (str "Invalid property in response found: "
+                            (lex/explain :any-output
+                                         schema
+                                         response))))))
+
 (defn process-request
   [service nsid {:keys [headers params body]
                  :or {headers {}
@@ -50,7 +60,8 @@
           res    (method uri (->> {}
                                   (construct-headers schema headers)
                                   (construct-query-params schema params)
-                                  (construct-body schema body)))]
-      {:data (parse-string (:body res) true)
+                                  (construct-body schema body)))
+          data   (parse-string (:body res) true)]
+      {:data (assert-valid-output schema data)
        :headers (:headers res)})
     (throw (Exception. "No schema found for that method/nsid"))))
