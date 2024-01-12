@@ -52,14 +52,31 @@
                   (clojure.java.io/copy stream saveFile)))))
           (recur (.getNextEntry stream)))))))
 
+(defn convert-lexicons
+  "Convert from json to edn"
+  []
+  (let [json-files (filter
+                    #(.isFile %)
+                    (file-seq (io/file (io/resource "lexicons"))))]
+    (let [edn-schemas (reduce
+                       (fn [schemas json-file]
+                         (let [contents (parse-string (slurp json-file) true)]
+                           (assoc schemas (:id contents) contents)))
+                       {}
+                       json-files)]
+      (clojure.pprint/pprint edn-schemas
+                             (io/writer "resources/lexisons.edn")))))
+
 (defn -main []
-  (prn "Fetching...")
   (let [repo  "atproto"
         packg "bsky"
         tag   "0.0.22"]
+    (prn "Fetching...")
     (with-open [stream (download-unzip (zip-url repo packg tag))]
       (prn "Saving...")
-      (save-lexicons stream repo packg tag)))
-  (prn "Done!"))
+      (save-lexicons stream repo packg tag))
+    (prn "Converting...")
+    (convert-lexicons)
+    (prn "Done!")))
 
 
