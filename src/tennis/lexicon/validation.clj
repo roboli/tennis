@@ -1,4 +1,4 @@
-(ns tennis.lexicon
+(ns tennis.lexicon.validation
   (:require [malli.core :as m]
             [malli.error :as me]))
 

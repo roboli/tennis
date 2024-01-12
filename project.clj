@@ -7,4 +7,5 @@
                  [clj-http "3.12.3"]
                  [cheshire "5.12.0"]
                  [metosin/malli "0.13.0"]]
+  :aliases {"init" ["run" "-m" "tennis.lexicon.init"]}
   :repl-options {:init-ns tennis.core})
