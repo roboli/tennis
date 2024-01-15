@@ -65,7 +65,7 @@
                        {}
                        json-files)]
       (clojure.pprint/pprint edn-schemas
-                             (io/writer "resources/lexisons.edn")))))
+                             (io/writer "resources/lexicons.edn")))))
 
 (defn -main
   "Fetch and convert lexicons json schemas:
