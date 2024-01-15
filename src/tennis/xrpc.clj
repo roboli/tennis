@@ -1,7 +1,8 @@
 (ns tennis.xrpc
   (:require [clj-http.client :as client]
             [cheshire.core :refer [parse-string generate-string]]
-            [tennis.lexicon :as lex]))
+            [tennis.lexicon.schemas :as lexicon]
+            [tennis.lexicon.validation :as lex]))
 
 (defn- http-method [schema]
   (if (= :query (lex/schema-type schema))
@@ -44,7 +45,7 @@
                  :or {headers {}
                       params {}
                       body {}}}]
-  (if-let [schema (get lex/schemas nsid)]
+  (if-let [schema (get lexicon/schemas nsid)]
     (let [uri    (str service "/xrpc/" nsid)
           method (http-method schema)
           res    (method uri (->> {}
