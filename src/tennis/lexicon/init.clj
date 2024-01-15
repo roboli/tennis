@@ -67,16 +67,27 @@
       (clojure.pprint/pprint edn-schemas
                              (io/writer "resources/lexisons.edn")))))
 
-(defn -main []
+(defn -main
+  "Fetch and convert lexicons json schemas:
+   Usage:
+
+   lein init [fetch]
+
+   Args:
+     fetch - Fetch lexicon json schemas from repo, defaults to true"
+  [& args]
   (let [repo  "atproto"
         packg "bsky"
         tag   "0.0.22"]
-    (prn "Fetching...")
-    (with-open [stream (download-unzip (zip-url repo packg tag))]
-      (prn "Saving...")
-      (save-lexicons stream repo packg tag))
-    (prn "Converting...")
-    (convert-lexicons)
-    (prn "Done!")))
+    (let [fetch (if (= "false" (first args)) false true)]
+      (if fetch
+        (do
+          (prn "Fetching...")
+          (with-open [stream (download-unzip (zip-url repo packg tag))]
+            (prn "Saving...")
+            (save-lexicons stream repo packg tag))))
+      (prn "Converting...")
+      (convert-lexicons)
+      (prn "Done!"))))
 
 
