@@ -34,12 +34,3 @@
     (-> valid-schema
         (m/explain data)
         (me/humanize data))))
-
-(defn schema-type [schema]
-  (keyword (get-in schema [:defs :main :type])))
-
-(def encoding-paths
-  {:procedure-input [:defs :main :input :encoding]})
-
-(defn schema-encoding [encoding-type schema]
-  (get-in schema (encoding-type encoding-paths)))

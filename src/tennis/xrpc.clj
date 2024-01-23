@@ -1,43 +1,43 @@
 (ns tennis.xrpc
   (:require [clj-http.client :as client]
             [cheshire.core :refer [parse-string generate-string]]
-            [tennis.lexicon.schemas :as lexicon]
-            [tennis.lexicon.validation :as lex]))
+            [tennis.lexicon.core :as lex]
+            [tennis.lexicon.validation :refer [validate explain]]))
 
-(defn- http-method [schema]
-  (if (= :query (lex/schema-type schema))
+(defn- http-method [lexicon]
+  (if (= :query (lex/type-def lexicon))
     client/get
     client/post))
 
-(defn- construct-headers [schema headers payload]
-  (if (and (= :procedure (lex/schema-type schema))
-           (= "application/json" (lex/schema-encoding :procedure-input schema)))
+(defn- construct-headers [lexicon headers payload]
+  (if (and (= :procedure (lex/type-def lexicon))
+           (= "application/json" (lex/encoding-def lexicon :procedure-input)))
     (-> (assoc payload :headers headers)
         (assoc-in [:headers :content-type] "application/json"))
     headers))
 
-(defn- construct-query-params [schema params payload]
-  (if (= :query (lex/schema-type schema))
-    (if (lex/validate :query-parameters
-                      schema
-                      params)
+(defn- construct-query-params [lexicon params payload]
+  (if (= :query (lex/type-def lexicon))
+    (if (validate :query-parameters
+                  lexicon
+                  params)
       (assoc payload :query-params params)
       (throw (Exception. (str "Invalid query param found: "
-                              (lex/explain :query-parameters
-                                           schema
-                                           params)))))
+                              (explain :query-parameters
+                                       lexicon
+                                       params)))))
     payload))
 
-(defn- construct-body [schema body payload]
-  (if (= :procedure (lex/schema-type schema))
-    (if (lex/validate :procedure-input
-                      schema
-                      body)
+(defn- construct-body [lexicon body payload]
+  (if (= :procedure (lex/type-def lexicon))
+    (if (validate :procedure-input
+                  lexicon
+                  body)
       (assoc payload :body (generate-string body))
       (throw (Exception. (str "Invalid property in body found: "
-                              (lex/explain :procedure-input
-                                           schema
-                                           body)))))
+                              (explain :procedure-input
+                                       lexicon
+                                       body)))))
     payload))
 
 (defn process-request
@@ -45,13 +45,13 @@
                  :or {headers {}
                       params {}
                       body {}}}]
-  (if-let [schema (get lexicon/schemas nsid)]
+  (if-let [lexicon (get lex/lexicons nsid)]
     (let [uri    (str service "/xrpc/" nsid)
-          method (http-method schema)
+          method (http-method lexicon)
           res    (method uri (->> {}
-                                  (construct-headers schema headers)
-                                  (construct-query-params schema params)
-                                  (construct-body schema body)))]
+                                  (construct-headers lexicon headers)
+                                  (construct-query-params lexicon params)
+                                  (construct-body lexicon body)))]
       {:data (parse-string (:body res) true)
        :headers (:headers res)})
-    (throw (Exception. "No schema found for that method/nsid"))))
+    (throw (Exception. "No lexicon found for that method/nsid"))))
