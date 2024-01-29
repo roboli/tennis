@@ -8,29 +8,22 @@
     "unknown" :any
     (keyword type)))
 
-(defn- schema->mallin [constraints]
-  (let [required (set (map keyword (:required constraints)))]
-    (reduce
-     (fn [acc [k v]]
-       (let [rule (if (not (required k))
-                    [k {:optional true}]
-                    [k])]
-         (conj acc (conj rule (coerce-type (:type v))))))
-     [:map]
-     (:properties constraints))))
+(defn- schema->malli [def required]
+  (let [rule (if (not required)
+               [k {:optional true}]
+               [k])]
+    (m/schema (conj rule (coerce-type (:type v))))))
 
-(def constraints-paths
-  {:query-parameters [:defs :main :parameters]
-   :procedure-input [:defs :main :input :schema]})
+(defn validate
+  ([concrete-def value] (validate concrete-def value true))
+  ([concrete-def value required]
+   (let [valid-schema (schema->malli concrete-def required)]
+     (m/validate valid-schema value))))
 
-(defn validate [constraint-type schema data]
-  (let [constraints  (get-in schema (constraint-type constraints-paths))
-        valid-schema (schema->mallin constraints)]
-    (m/validate valid-schema data)))
-
-(defn explain [constraint-type schema data]
-  (let [constraints  (get-in schema (constraint-type constraints-paths))
-        valid-schema (schema->mallin constraints)]
-    (-> valid-schema
-        (m/explain data)
-        (me/humanize data))))
+(defn explain
+  ([concrete-def value] (explain concrete-def value true))
+  ([concrete-def value required]
+   (let [valid-schema (schema->malli concrete-def required)]
+     (-> valid-schema
+         (m/explain data)
+         (me/humanize data)))))
