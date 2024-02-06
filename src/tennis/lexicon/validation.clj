@@ -10,9 +10,9 @@
 
 (defn- schema->malli [def required]
   (let [rule (if (not required)
-               [k {:optional true}]
-               [k])]
-    (m/schema (conj rule (coerce-type (:type v))))))
+               [{:optional true}]
+               [])]
+    (m/schema (conj rule (coerce-type (:type def))))))
 
 (defn validate
   ([concrete-def value] (validate concrete-def value true))
@@ -25,5 +25,5 @@
   ([concrete-def value required]
    (let [valid-schema (schema->malli concrete-def required)]
      (-> valid-schema
-         (m/explain data)
-         (me/humanize data)))))
+         (m/explain value)
+         (me/humanize value)))))

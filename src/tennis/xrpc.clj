@@ -24,7 +24,7 @@
       (assoc payload :query-params params)
       (throw (Exception. (str "Invalid query param found: "
                               (explain :query-parameters
-                                       lexicon
+                                       lexicon-def
                                        params)))))
     payload))
 
