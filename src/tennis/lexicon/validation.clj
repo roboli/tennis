@@ -8,22 +8,25 @@
     "unknown" :any
     (keyword type)))
 
-(defn- schema->malli [def required]
+(defn- schema->malli [k def required]
   (let [rule (if (not required)
-               [{:optional true}]
-               [])]
-    (m/schema (conj rule (coerce-type (:type def))))))
+               [k {:optional true}]
+               [k])]
+    [:map (conj rule (coerce-type (:type def)))]))
 
 (defn validate
-  ([concrete-def value] (validate concrete-def value true))
-  ([concrete-def value required]
-   (let [valid-schema (schema->malli concrete-def required)]
-     (m/validate valid-schema value))))
+  ([k concrete-def value] (validate k concrete-def value true))
+  ([k concrete-def value required]
+   (let [valid-schema (schema->malli k concrete-def required)]
+     (m/validate valid-schema (if-not value
+                                {}
+                                {k value})))))
 
 (defn explain
-  ([concrete-def value] (explain concrete-def value true))
-  ([concrete-def value required]
-   (let [valid-schema (schema->malli concrete-def required)]
+  ([k concrete-def value] (explain concrete-def value true))
+  ([k concrete-def value required]
+   (let [valid-schema (schema->malli k concrete-def required)
+         val          (if-not value {} {k value})]
      (-> valid-schema
-         (m/explain value)
-         (me/humanize value)))))
+         (m/explain val)
+         (me/humanize val)))))

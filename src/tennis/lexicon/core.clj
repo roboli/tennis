@@ -35,19 +35,20 @@
 (defn to-concrete [[k def] required value]
   (condp = (:type def)
         "array"
-        (if (seq? value)
-          (reduce
-           (fn [acc val]
+        (if (coll? value)
+          (reduce-kv
+           (fn [acc idx val]
              (let [results (recur-defs [[k (:items def)]]
                                        required
-                                       {k value}
+                                       {k val}
                                        [])]
-               (if (seq? results)
-                 (conj acc results)
+               (if (seq results)
+                 (let [result (first results)]
+                   (conj acc {k {idx (get result k)}}))
                  acc)))
            []
            value)
-          [{k "Must be an array"}])
+          [{k ["Must be an array"]}])
 
         "ref"
         (let [lexicon (find-def (:ref def))]
@@ -56,21 +57,21 @@
 (defn recur-defs [defs required data results]
   (if (empty? defs)
     results
-    (let [[k def] (first defs)]
+    (let [[k def] (first defs)
+          value   (get data k)]
       (if (concrete-types (:type def))
-        (let [value  (get data k)
-              result (validate def value (required k))]
+        (let [result (validate k def value (required k))]
           (if-not result
             (recur-defs (rest defs)
                         required
                         data
-                        (conj results {k (explain def value (required k))}))
+                        (conj results (explain k def value (required k))))
             (recur-defs (rest defs)
                         required
                         data
                         results)))
         (if (and (not (required k))
-                 (empty? (get data k)))
+                 (empty? value))
           (recur-defs (rest defs)
                       required
                       data
@@ -78,8 +79,10 @@
           (recur-defs (rest defs)
                       required
                       data
-                      (conj results
-                            (to-concrete [k def] required data))))))))
+                      (let [rs (to-concrete [k def] required value)]
+                        (if (seq rs)
+                          (into results rs)
+                          results))))))))
 
 (defn visit-lexicon [lexicon data]
   (let [defs     (map (fn [[k v]] [k v]) (:properties lexicon))
