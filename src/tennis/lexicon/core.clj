@@ -30,7 +30,7 @@
       (get-in lexicons [name-def :defs :main]))))
 
 (declare recur-defs)
-(declare visit-lexicon)
+(declare visit-def)
 
 (defn to-concrete [[k def] required value]
   (condp = (:type def)
@@ -51,8 +51,8 @@
           [{k ["Must be an array"]}])
 
         "ref"
-        (let [lexicon (find-def (:ref def))]
-          (visit-lexicon lexicon {k value}))))
+        (let [lexicon-def (find-def (:ref def))]
+          (visit-def lexicon-def {k value}))))
 
 (defn recur-defs [defs required data results]
   (if (empty? defs)
@@ -84,18 +84,18 @@
                           (into results rs)
                           results))))))))
 
-(defn visit-lexicon [lexicon data]
-  (let [defs     (map (fn [[k v]] [k v]) (:properties lexicon))
-        required (set (map keyword (:required lexicon)))]
+(defn visit-def [def data]
+  (let [defs     (map (fn [[k v]] [k v]) (:properties def))
+        required (set (map keyword (:required def)))]
     (recur-defs defs required data [])))
 
 (defmulti assert-valid-xrpc :type)
 
 (defmethod assert-valid-xrpc :query-input [{:keys [def data]}]
-  (visit-lexicon (:parameters def) data))
+  (visit-def (:parameters def) data))
 
 (defmethod assert-valid-xrpc :procedure-input [{:keys [def data]}]
-  (visit-lexicon (get-in def [:input :schema]) data))
+  (visit-def (get-in def [:input :schema]) data))
 
 (defmethod assert-valid-xrpc :output [{:keys [def data]}]
-  (visit-lexicon (get-in def [:output :schema]) data))
+  (visit-def (get-in def [:output :schema]) data))
